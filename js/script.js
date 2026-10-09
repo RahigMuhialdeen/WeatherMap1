@@ -42,6 +42,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const longitude = Number(data[0].lon);
             const displayName = data[0].display_name;
 
+            const apiKey = "6fd044a951d8bdae75592a5c231a252e"; 
+
+const weatherUrl =
+    `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+
+const weatherResponse = await fetch(weatherUrl);
+
+if (!weatherResponse.ok) {
+    throw new Error("Unable to retrieve weather data.");
+}
+
+const weatherData = await weatherResponse.json();
+
+console.log("Weather data:", weatherData);
+
             searchResult.textContent =
                 `Location: ${displayName} | Latitude: ${latitude} | Longitude: ${longitude}`;
 
