@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const weatherForm = document.getElementById("weather-form");
     const locationInput = document.getElementById("location");
     const searchResult = document.getElementById("search-result");
+    const weatherResult = document.getElementById("weather-result");
 
     weatherForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -55,7 +56,28 @@ if (!weatherResponse.ok) {
 
 const weatherData = await weatherResponse.json();
 
-console.log("Weather data:", weatherData);
+const temperature = weatherData.main.temp;
+const humidity = weatherData.main.humidity;
+const windSpeed = weatherData.wind.speed;
+const clouds = weatherData.clouds.all;
+const description = weatherData.weather[0].description;
+const icon = weatherData.weather[0].icon;
+const cityName = weatherData.name;
+
+weatherResult.innerHTML = `
+    <h2>Weather in ${cityName}</h2>
+
+    <img
+        src="https://openweathermap.org/img/wn/${icon}@2x.png"
+        alt="${description}"
+    >
+
+    <p><strong>Temperature:</strong> ${temperature} °C</p>
+    <p><strong>Weather Status:</strong> ${description}</p>
+    <p><strong>Humidity:</strong> ${humidity}%</p>
+    <p><strong>Wind Speed:</strong> ${windSpeed} m/s</p>
+    <p><strong>Cloudiness:</strong> ${clouds}%</p>
+`;
 
             searchResult.textContent =
                 `Location: ${displayName} | Latitude: ${latitude} | Longitude: ${longitude}`;
