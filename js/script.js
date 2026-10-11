@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const locationInput = document.getElementById("location");
     const searchResult = document.getElementById("search-result");
     const weatherResult = document.getElementById("weather-result");
+    let currentMarker = null;
 
     weatherForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -41,6 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const latitude = Number(data[0].lat);
             const longitude = Number(data[0].lon);
+            map.setView([latitude, longitude], 10);
+
+if (currentMarker !== null) {
+    map.removeLayer(currentMarker);
+}
+
+currentMarker = L.marker([latitude, longitude]).addTo(map);
             const displayName = data[0].display_name;
 
             const apiKey = "6fd044a951d8bdae75592a5c231a252e"; 
