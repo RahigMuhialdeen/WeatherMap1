@@ -87,6 +87,62 @@ weatherResult.innerHTML = `
     <p><strong>Cloudiness:</strong> ${clouds}%</p>
 `;
 
+const popupContent = `
+    <div class="weather-popup">
+        <h3>${cityName}</h3>
+
+        <img
+            src="https://openweathermap.org/img/wn/${icon}@2x.png"
+            alt="${description}"
+        >
+
+        <p><strong>Temperature:</strong> ${temperature} °C</p>
+        <p><strong>Weather Status:</strong> ${description}</p>
+        <p><strong>Humidity:</strong> ${humidity}%</p>
+        <p><strong>Wind Speed:</strong> ${windSpeed} m/s</p>
+        <p><strong>Cloudiness:</strong> ${clouds}%</p>
+
+        <button type="button" id="share-weather">
+            Share Weather
+        </button>
+    </div>
+`;
+
+const shareText =
+    `Weather in ${cityName}: ${temperature} °C, ` +
+    `${description}, Humidity: ${humidity}%, ` +
+    `Wind: ${windSpeed} m/s, Clouds: ${clouds}%. ` ;
+
+currentMarker.bindPopup(popupContent);
+
+currentMarker.on("popupopen", (e) => {
+    const shareButton = e.popup.getElement().querySelector("#share-weather");
+    if (!shareButton) return;
+
+    shareButton.addEventListener("click", async () => {
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: `Weather in ${cityName}`,
+                    text: shareText
+                });
+            } else if (navigator.clipboard) {
+                await navigator.clipboard.writeText(shareText);
+                alert("Weather information copied to clipboard!");
+            } else {
+                alert("Sharing is not supported in this browser.");
+            }
+        } catch (error) {
+            if (error.name !== "AbortError") {
+                console.error("Unable to share weather:", error);
+                alert("Unable to share weather information.");
+            }
+        }
+    });
+});
+
+currentMarker.openPopup();
+
             searchResult.textContent =
                 `Location: ${displayName} | Latitude: ${latitude} | Longitude: ${longitude}`;
 
