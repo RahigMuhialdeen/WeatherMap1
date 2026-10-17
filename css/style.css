@@ -85,3 +85,42 @@ button:hover {
     border: 3px solid #1f2937;
     border-radius: 12px;
 }
+
+#favorites-section {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: #f5f8fc;
+    border-radius: 10px;
+}
+
+#favorites-section h2 {
+    margin-bottom: 15px;
+}
+
+#favorites-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#favorites-list div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#favorites-list button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#favorites-list button:first-child {
+    background-color: #dceeff;
+}
+
+#favorites-list button:last-child {
+    background-color: #ffe0e0;
+}
