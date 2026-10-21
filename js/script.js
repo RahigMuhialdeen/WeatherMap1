@@ -153,10 +153,8 @@ if (currentMarker !== null) {
 currentMarker = L.marker([latitude, longitude]).addTo(map);
             const displayName = data[0].display_name;
 
-            const apiKey = "6fd044a951d8bdae75592a5c231a252e"; 
-
 const weatherUrl =
-    `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+    `https://weathermap-api.rahigmuhialdeen.workers.dev/weather?lat=${latitude}&lon=${longitude}`;
 
 const weatherResponse = await fetch(weatherUrl);
 
