@@ -15,6 +15,7 @@ const favoritesList = document.getElementById("favorites-list");
 const FAVORITES_KEY = "weatherMapFavorites";
 let currentCityName = null;
     let currentMarker = null;
+    let currentWeatherContext = "";
 
     function getFavorites() {
     try {
@@ -172,6 +173,10 @@ const description = weatherData.weather[0].description;
 const icon = weatherData.weather[0].icon;
 const cityName = weatherData.name;
 currentCityName = cityName;
+currentWeatherContext =
+    `City: ${cityName}. Temperature: ${temperature} °C. ` +
+    `Condition: ${description}. Humidity: ${humidity}%. ` +
+    `Wind speed: ${windSpeed} m/s. Cloudiness: ${clouds}%.`;
 
 weatherResult.innerHTML = `
     <h2>Weather in ${cityName}</h2>
@@ -255,6 +260,63 @@ currentMarker.openPopup();
 
             searchResult.textContent =
                 "Something went wrong while searching. Please try again.";
+        }
+    });
+    // ===== AI Chatbot =====
+    const chatForm = document.getElementById("chat-form");
+    const chatInput = document.getElementById("chat-input");
+    const chatMessages = document.getElementById("chat-messages");
+    const chatSend = document.getElementById("chat-send");
+    const CHAT_URL =
+        "https://weathermap-api.rahigmuhialdeen.workers.dev/chat";
+
+    function addChatMessage(text, type) {
+        const bubble = document.createElement("div");
+        bubble.className = `chat-message ${type}`;
+        bubble.textContent = text;
+        chatMessages.appendChild(bubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return bubble;
+    }
+
+    chatForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const question = chatInput.value.trim();
+        if (!question) return;
+
+        addChatMessage(question, "user");
+        chatInput.value = "";
+        chatSend.disabled = true;
+
+        const loading = addChatMessage("Thinking...", "bot loading");
+
+        try {
+            const response = await fetch(CHAT_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    message: question,
+                    weatherContext: currentWeatherContext
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Request failed");
+            }
+
+            loading.className = "chat-message bot";
+            loading.textContent = data.answer;
+        } catch (error) {
+            console.error("Chat error:", error);
+            loading.className = "chat-message bot error";
+            loading.textContent =
+                "The AI assistant is busy or unavailable. Please wait a minute and try again.";
+        } finally {
+            chatSend.disabled = false;
+            chatInput.focus();
         }
     });
 });

@@ -55,9 +55,29 @@
 
         </section>
 
-        <section>
-            <div id="map"></div>
-        </section>
+        <div class="map-chat-layout">
+            <section>
+                <div id="map"></div>
+            </section>
+
+            <section id="chat-section">
+                <h2>Ask the Weather AI 🤖</h2>
+                <p>Search for a city first, then ask a question about its weather.</p>
+
+                <div id="chat-messages" aria-live="polite"></div>
+
+                <form id="chat-form">
+                    <input
+                        type="text"
+                        id="chat-input"
+                        placeholder="Ask me anything about this city's weather..."
+                        maxlength="500"
+                        required
+                    >
+                    <button type="submit" id="chat-send">Send</button>
+                </form>
+            </section>
+        </div>
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
