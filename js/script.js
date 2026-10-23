@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const locationInput = document.getElementById("location");
     const searchResult = document.getElementById("search-result");
     const weatherResult = document.getElementById("weather-result");
+    const loadingSpinner = document.getElementById("loading-spinner");
+    const alertBox = document.getElementById("alert-box");
     const addFavoriteButton = document.getElementById("add-favorite");
 const favoritesList = document.getElementById("favorites-list");
 
@@ -16,6 +18,19 @@ const FAVORITES_KEY = "weatherMapFavorites";
 let currentCityName = null;
     let currentMarker = null;
     let currentWeatherContext = "";
+    function showAlert(message) {
+        alertBox.textContent = message;
+        alertBox.hidden = false;
+    }
+
+    function hideAlert() {
+        alertBox.textContent = "";
+        alertBox.hidden = true;
+    }
+
+    function setLoading(isLoading) {
+        loadingSpinner.hidden = !isLoading;
+    }
 
     function getFavorites() {
     try {
@@ -116,15 +131,17 @@ renderFavorites();
         event.preventDefault();
 
         currentCityName = null;
+        hideAlert();
 
         const location = locationInput.value.trim();
 
         if (!location) {
-            searchResult.textContent = "Please enter a city or location.";
+            showAlert("Please enter a city or location.");
             return;
         }
 
-        searchResult.textContent = "Searching for location...";
+        searchResult.textContent = "";
+                setLoading(true);
 
         try {
             const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(location)}`;
@@ -138,20 +155,13 @@ renderFavorites();
             const data = await response.json();
 
             if (data.length === 0) {
-                searchResult.textContent =
-                    "Location not found. Please try another city.";
+                showAlert("Location not found. Please try another city.");
                 return;
             }
 
             const latitude = Number(data[0].lat);
             const longitude = Number(data[0].lon);
-            map.setView([latitude, longitude], 10);
-
-if (currentMarker !== null) {
-    map.removeLayer(currentMarker);
-}
-
-currentMarker = L.marker([latitude, longitude]).addTo(map);
+            
             const displayName = data[0].display_name;
 
 const weatherUrl =
@@ -160,7 +170,13 @@ const weatherUrl =
 const weatherResponse = await fetch(weatherUrl);
 
 if (!weatherResponse.ok) {
-    throw new Error("Unable to retrieve weather data.");
+    if (weatherResponse.status === 404) {
+        throw new Error("Weather data was not found for this location.");
+    }
+
+    throw new Error(
+        "The weather service is unavailable right now. Please try again later."
+    );
 }
 
 const weatherData = await weatherResponse.json();
@@ -219,6 +235,14 @@ const shareText =
     `${description}, Humidity: ${humidity}%, ` +
     `Wind: ${windSpeed} m/s, Clouds: ${clouds}%. ` ;
 
+map.flyTo([latitude, longitude], 10, { duration: 1.5 });
+
+if (currentMarker !== null) {
+    map.removeLayer(currentMarker);
+}
+
+currentMarker = L.marker([latitude, longitude]).addTo(map);
+
 currentMarker.bindPopup(popupContent);
 
 currentMarker.on("popupopen", (e) => {
@@ -256,10 +280,20 @@ currentMarker.openPopup();
             console.log("Longitude:", longitude);
 
         } catch (error) {
-            console.error("Geocoding error:", error);
+            console.error("Search error:", error);
 
-            searchResult.textContent =
-                "Something went wrong while searching. Please try again.";
+            if (error instanceof TypeError) {
+                showAlert(
+                    "Network error. Please check your connection and try again."
+                );
+            } else {
+                showAlert(
+                    error.message ||
+                    "Something went wrong while searching. Please try again."
+                );
+            }
+        } finally {
+            setLoading(false);
         }
     });
     // ===== AI Chatbot =====
