@@ -140,22 +140,31 @@ button:active {
 #favorites-list div {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
+    padding: 4px;
+    background-color: white;
+    border: 1px solid #dbe3ec;
+    border-radius: 999px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 #favorites-list button {
-    padding: 8px 12px;
+    padding: 6px 14px;
     border: none;
-    border-radius: 6px;
+    border-radius: 999px;
+    font-size: 0.9rem;
     cursor: pointer;
 }
 
 #favorites-list button:first-child {
     background-color: #dceeff;
+    color: #1d4ed8;
 }
 
 #favorites-list button:last-child {
     background-color: #ffe0e0;
+    color: #991b1b;
+    font-size: 0.8rem;
 }
 
 .map-chat-layout {
@@ -279,5 +288,19 @@ button:active {
 }
 
 .alert-card[hidden] {
+    display: none;
+}
+
+.share-message {
+    margin: 8px 0 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: #1f2937;
+    color: white;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.share-message[hidden] {
     display: none;
 }

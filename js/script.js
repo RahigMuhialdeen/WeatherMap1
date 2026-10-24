@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const weatherForm = document.getElementById("weather-form");
     const locationInput = document.getElementById("location");
     const searchResult = document.getElementById("search-result");
-    const weatherResult = document.getElementById("weather-result");
     const loadingSpinner = document.getElementById("loading-spinner");
     const alertBox = document.getElementById("alert-box");
     const addFavoriteButton = document.getElementById("add-favorite");
@@ -18,6 +17,7 @@ const FAVORITES_KEY = "weatherMapFavorites";
 let currentCityName = null;
     let currentMarker = null;
     let currentWeatherContext = "";
+    let chatHistory = [];
     function showAlert(message) {
         alertBox.textContent = message;
         alertBox.hidden = false;
@@ -161,8 +161,6 @@ renderFavorites();
 
             const latitude = Number(data[0].lat);
             const longitude = Number(data[0].lon);
-            
-            const displayName = data[0].display_name;
 
 const weatherUrl =
     `https://weathermap-api.rahigmuhialdeen.workers.dev/weather?lat=${latitude}&lon=${longitude}`;
@@ -193,21 +191,7 @@ currentWeatherContext =
     `City: ${cityName}. Temperature: ${temperature} °C. ` +
     `Condition: ${description}. Humidity: ${humidity}%. ` +
     `Wind speed: ${windSpeed} m/s. Cloudiness: ${clouds}%.`;
-
-weatherResult.innerHTML = `
-    <h2>Weather in ${cityName}</h2>
-
-    <img
-        src="https://openweathermap.org/img/wn/${icon}@2x.png"
-        alt="${description}"
-    >
-
-    <p><strong>Temperature:</strong> ${temperature} °C</p>
-    <p><strong>Weather Status:</strong> ${description}</p>
-    <p><strong>Humidity:</strong> ${humidity}%</p>
-    <p><strong>Wind Speed:</strong> ${windSpeed} m/s</p>
-    <p><strong>Cloudiness:</strong> ${clouds}%</p>
-`;
+    chatHistory = [];
 
 const popupContent = `
     <div class="weather-popup">
@@ -227,6 +211,7 @@ const popupContent = `
         <button type="button" id="share-weather">
             Share Weather
         </button>
+        <p class="share-message" role="status" hidden></p>
     </div>
 `;
 
@@ -248,6 +233,16 @@ currentMarker.bindPopup(popupContent);
 currentMarker.on("popupopen", (e) => {
     const shareButton = e.popup.getElement().querySelector("#share-weather");
     if (!shareButton) return;
+    const shareMessage = e.popup.getElement().querySelector(".share-message");
+
+    function showShareMessage(text) {
+        shareMessage.textContent = text;
+        shareMessage.hidden = false;
+
+        setTimeout(() => {
+            shareMessage.hidden = true;
+        }, 3000);
+    }
 
     shareButton.addEventListener("click", async () => {
         try {
@@ -258,26 +253,20 @@ currentMarker.on("popupopen", (e) => {
                 });
             } else if (navigator.clipboard) {
                 await navigator.clipboard.writeText(shareText);
-                alert("Weather information copied to clipboard!");
+                showShareMessage("Copied to clipboard!");
             } else {
-                alert("Sharing is not supported in this browser.");
+                showShareMessage("Sharing is not supported in this browser.");
             }
         } catch (error) {
             if (error.name !== "AbortError") {
                 console.error("Unable to share weather:", error);
-                alert("Unable to share weather information.");
+                showShareMessage("Unable to share weather.");
             }
         }
     });
 });
 
 currentMarker.openPopup();
-
-            searchResult.textContent =
-                `Location: ${displayName} | Latitude: ${latitude} | Longitude: ${longitude}`;
-
-            console.log("Latitude:", latitude);
-            console.log("Longitude:", longitude);
 
         } catch (error) {
             console.error("Search error:", error);
@@ -313,6 +302,11 @@ currentMarker.openPopup();
         return bubble;
     }
 
+    addChatMessage(
+        "Hi! Search for a city, then ask me anything about its weather.",
+        "bot"
+    );
+
     chatForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
@@ -331,7 +325,8 @@ currentMarker.openPopup();
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     message: question,
-                    weatherContext: currentWeatherContext
+                    weatherContext: currentWeatherContext,
+                    history: chatHistory
                 })
             });
 
@@ -343,6 +338,11 @@ currentMarker.openPopup();
 
             loading.className = "chat-message bot";
             loading.textContent = data.answer;
+            chatHistory.push(
+                { role: "user", text: question },
+                { role: "model", text: data.answer }
+            );
+            chatHistory = chatHistory.slice(-6);
         } catch (error) {
             console.error("Chat error:", error);
             loading.className = "chat-message bot error";
